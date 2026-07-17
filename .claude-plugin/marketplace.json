@@ -1,0 +1,13 @@
+{
+  "name": "project-toolbox",
+  "owner": {
+    "name": "Duy Lam"
+  },
+  "plugins": [
+    {
+      "name": "session-capture",
+      "source": "./plugins/session-capture",
+      "description": "Archives each Claude Code session — transcript and sidecar — into .swiki/captures/ when the session ends or is cleared, with one path-scoped git commit per capture."
+    }
+  ]
+}

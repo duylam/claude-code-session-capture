@@ -1,0 +1,29 @@
+{
+  "description": "session-capture: archives the session bundle when a session ends or is cleared; reports failures from earlier sessions on the next session start.",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/capture.sh\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/surface-errors.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
