@@ -1,5 +1,5 @@
 {
-  "description": "session-capture: archives the session bundle when a session ends or is cleared; reports failures from earlier sessions on the next session start.",
+  "description": "session-capture: provisions the .swiki/ scaffold on session start, archives the session bundle when a session ends or is cleared, and reports failures from earlier sessions on the next session start.",
   "hooks": {
     "SessionEnd": [
       {
@@ -17,6 +17,11 @@
       {
         "matcher": "*",
         "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/provision.sh\"",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/surface-errors.sh\"",

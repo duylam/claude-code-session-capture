@@ -1,5 +1,5 @@
 {
   "name": "session-capture",
-  "version": "0.1.0",
-  "description": "Archives Claude Code sessions into the repo you are working in. Copies the session transcript and its optional sidecar into .swiki/captures/ and commits path-scoped to .swiki/ only. Requires git and jq on the host. Note: the commit is made by a hook, so it can land mid-session."
+  "version": "0.2.0",
+  "description": "Archives Claude Code sessions into the repo you are working in. Auto-provisions the .swiki/ scaffold on session start (git repos only), copies the session transcript and its optional sidecar into .swiki/captures/, and commits path-scoped to .swiki/ only. Requires git and jq on the host. Note: the commit is made by a hook, so it can land mid-session."
 }

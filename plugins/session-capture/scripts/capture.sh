@@ -9,8 +9,12 @@
 # Fires on SessionEnd only, which covers both session end and pre-/clear. Any
 # other event falls through to the unexpected-event failure below.
 #
-# Exit 0 on no-op (project not opted in, or refusal during rebase/merge/etc —
-# the next capture event picks the session up again). Failures append to
+# The capture is the on-disk bundle; committing it is best-effort. When git is
+# unavailable, the project isn't a git repo, or a git operation is in flight,
+# the bundle is still archived and a later capture commits it -- capture never
+# fails for lack of git.
+#
+# Exit 0 on no-op (project not opted in). Failures append to
 # .swiki/logs/capture-errors.log, surfaced by surface-errors.sh on the next
 # SessionStart.
 #
@@ -55,17 +59,6 @@ case "$hook_event" in
     ;;
   *) fail "unexpected hook event: ${hook_event:-<none>}" ;;
 esac
-
-# Refusal: never touch the index while a git operation is in flight.
-git_dir=$(git -C "$project_dir" rev-parse --git-dir 2>/dev/null) \
-  || fail "not inside a git repository: $project_dir"
-case "$git_dir" in /*) ;; *) git_dir="$project_dir/$git_dir" ;; esac
-for marker in MERGE_HEAD REBASE_HEAD CHERRY_PICK_HEAD BISECT_LOG rebase-merge rebase-apply; do
-  if [ -e "$git_dir/$marker" ]; then
-    log_error "refusing to capture: git operation in progress ($marker present); next capture event will retry"
-    exit 0
-  fi
-done
 
 # Timestamps are UTC ISO 8601: the item name gets the filename-safe
 # second-granularity form; accept-event-since carries milliseconds so
@@ -117,6 +110,22 @@ jq -n \
     source_transcript: $source_transcript,
     source_sidecar: $source_sidecar
   }' > "$bundle/capture.json" || fail "failed to write capture.json"
+
+# The bundle above IS the capture. Committing it is best-effort: when git is
+# unavailable or the project isn't a git repo, the bundle stays on disk
+# uncommitted and a later capture's commit -- which stages all of .swiki/ --
+# sweeps it up. Capture never fails for lack of git.
+command -v git >/dev/null 2>&1 || exit 0
+git_dir=$(git -C "$project_dir" rev-parse --git-dir 2>/dev/null) || exit 0
+case "$git_dir" in /*) ;; *) git_dir="$project_dir/$git_dir" ;; esac
+
+# Never touch the index while a git operation is in flight; defer the commit.
+for marker in MERGE_HEAD REBASE_HEAD CHERRY_PICK_HEAD BISECT_LOG rebase-merge rebase-apply; do
+  if [ -e "$git_dir/$marker" ]; then
+    log_error "bundle archived, commit deferred: git operation in progress ($marker present); a later capture will commit it"
+    exit 0
+  fi
+done
 
 # Path-scoped commit: only .swiki/ is ever staged or committed; the
 # developer's staged files stay staged and stay out of this commit.
