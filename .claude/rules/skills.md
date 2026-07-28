@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/.claude/skills/*/SKILL.md"
+  - "**/skills/*/SKILL.md"
 ---
 
 > ## Documentation Index

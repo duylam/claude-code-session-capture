@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/.claude/agents/*.md"
+  - "**/agents/*.md"
 ---
 
 > ## Documentation Index
