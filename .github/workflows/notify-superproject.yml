@@ -1,0 +1,31 @@
+name: Notify superproject on push to main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Emit repo_dispatch to superproject
+        env:
+          TOKEN: ${{ secrets.CROSS_REPO_GITHUB_TOKEN }}
+          SUPER_REPO: ${{ vars.SUPER_PROJECT_REPO_NAME }}
+        run: |
+          payload=$(jq -n \
+            --arg event_type "submodule-updated" \
+            --arg repo "${{ github.event.repository.name }}" \
+            --arg sha  "${{ github.sha }}" \
+            --arg ref  "${{ github.ref }}" \
+            '{"event_type":$event_type,"client_payload":{"repo":$repo,"sha":$sha,"ref":$ref}}')
+
+          curl -fsSL \
+            -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository_owner }}/$SUPER_REPO/dispatches" \
+            -d "$payload"
