@@ -25,5 +25,9 @@
   "alwaysThinkingEnabled": true,
   "plansDirectory": ".claude/plans",
   "outputStyle": "Default",
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "attribution": {
+    "sessionUrl": false,
+    "commit": "Generated with AI\n\nCo-Authored-By: Claude <81847+claude@users.noreply.github.com>"
+  }
 }
